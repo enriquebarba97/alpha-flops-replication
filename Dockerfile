@@ -29,7 +29,7 @@ RUN pip3 install --upgrade setuptools
 #         pip3 install torch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1; \
 #     fi
 
-RUN pip3 install torch==2.9.1 numpy==2.2.6 pandas==2.3.3 scipy==1.15.3 matplotlib==3.10.8
+RUN pip3 install torch==2.9.1 numpy==2.2.6 pandas==2.3.3 scipy==1.16.3 matplotlib==3.10.8
 
 ENV NVIDIA_VISIBLE_DEVICES=all
 ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
