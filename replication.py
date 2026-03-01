@@ -75,10 +75,10 @@ def create_conv_layer(in_channels: int, out_channels: int,
 
 
 def measure_forward_time(layer: nn.Module, input_tensor: torch.Tensor) -> float:
-    # torch.cuda.synchronize()
+    torch.cuda.synchronize()
     start = time.time()
     _ = layer(input_tensor)
-    #torch.cuda.synchronize()
+    torch.cuda.synchronize()
     end = time.time()
     return end - start
 
