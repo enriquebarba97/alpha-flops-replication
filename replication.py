@@ -61,7 +61,7 @@ def _figure_path(experiment_id: str) -> str:
 
 
 def create_conv_layer(in_channels: int, out_channels: int,
-                      kernel_size: int = 1, padding=0) -> nn.Conv2d:
+                      kernel_size: int = 1, padding="same") -> nn.Conv2d:
     layer = nn.Conv2d(
         in_channels=in_channels,
         out_channels=out_channels,
@@ -130,7 +130,7 @@ def collect_experiment_A() -> pd.DataFrame:
 
         # Conv 1x2
         c_in, c_out = scale * 100, scale * 50
-        layer = create_conv_layer(c_in, c_out, kernel_size=1)
+        layer = create_conv_layer(c_in, c_out, kernel_size=1, padding="same")
         inp = torch.randn(1, c_in, 1, 2, device=device)
         avg, q25, q75 = benchmark(layer, inp)
         rows.append(dict(layer_type="Conv_1x2", K=1, Cin=c_in, Cout=c_out,
@@ -140,7 +140,7 @@ def collect_experiment_A() -> pd.DataFrame:
 
         # Conv 2x2
         c_in = c_out = scale * 50
-        layer = create_conv_layer(c_in, c_out, kernel_size=1)
+        layer = create_conv_layer(c_in, c_out, kernel_size=1, padding="same")
         inp = torch.randn(1, c_in, 2, 2, device=device)
         avg, q25, q75 = benchmark(layer, inp)
         rows.append(dict(layer_type="Conv_2x2", K=1, Cin=c_in, Cout=c_out,
@@ -150,7 +150,7 @@ def collect_experiment_A() -> pd.DataFrame:
 
         # Conv 4x4
         c_in = c_out = scale * 25
-        layer = create_conv_layer(c_in, c_out, kernel_size=1)
+        layer = create_conv_layer(c_in, c_out, kernel_size=1, padding="same")
         inp = torch.randn(1, c_in, 4, 4, device=device)
         avg, q25, q75 = benchmark(layer, inp)
         rows.append(dict(layer_type="Conv_4x4", K=1, Cin=c_in, Cout=c_out,
