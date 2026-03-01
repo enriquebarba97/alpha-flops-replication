@@ -115,7 +115,7 @@ def compute_flops(W, H, K, C_in, C_out):
 
 
 # ===============================================================================
-# Experiment A  (notebook: Figure 3b)
+# Experiment A
 # Conv layers with increasing channel dimensions at equal FLOPs.
 #   Conv_1x2 : K=1, H=1, W=2, Cin=2^i*100, Cout=2^i*50
 #   Conv_2x2 : K=1, H=2, W=2, Cin=2^i*50,  Cout=2^i*50
@@ -202,7 +202,7 @@ def plot_experiment_A():
 
 
 # ===============================================================================
-# Experiment B  (notebook: Figure 4b - Increase K, Decrease C)
+# Experiment B
 # CxK held constant at {1500, 2100, 3000, 4500}; K varies 1..30; H=W=10.
 # ===============================================================================
 
@@ -255,7 +255,7 @@ def plot_experiment_B():
 
 
 # ===============================================================================
-# Experiment C  (notebook: Figure 4b - H=W=300/K, fixed C)
+# Experiment C
 # C in {50, 70, 100, 150}; K varies 1..30; H = W = round(300/K).
 # ===============================================================================
 
@@ -310,7 +310,7 @@ def plot_experiment_C():
 
 
 # ===============================================================================
-# Experiment D  (notebook: Figure 5a - Vary W)
+# Experiment D
 # W varies 1..649; H=100, K=3, Cout=100; Cin in {50, 100, 150}.
 # ===============================================================================
 
@@ -393,7 +393,7 @@ def plot_experiment_D_reduced():
 
 
 # ===============================================================================
-# Experiment E  (notebook: Figure 5b - Vary Cout)
+# Experiment E
 # Cout varies 1..649; W=100, H=100, K=3; Cin in {50, 100, 150}.
 # ===============================================================================
 
@@ -476,7 +476,7 @@ def plot_experiment_E_reduced():
 
 
 # ===============================================================================
-# Experiment F  (notebook: Figure 6a - Vary Cout, K=1, different H)
+# Experiment F
 # Cout varies 1..649; W=100, K=1, Cin=50; H in {100, 200, 300}.
 # ===============================================================================
 
@@ -559,7 +559,7 @@ def plot_experiment_F_reduced():
 
 
 # ===============================================================================
-# Experiment G  (notebook: Figure 6b - Vary Cin, different K)
+# Experiment G
 # Cin varies 1..999; W=10, H=10, Cout=1000; K in {1, 3, 5}.
 # ===============================================================================
 
@@ -640,10 +640,6 @@ def plot_experiment_G_reduced():
     plt.close(fig)
     print(f"Saved {path}")
 
-
-# ===============================================================================
-# Dispatcher
-# ===============================================================================
 
 EXPERIMENTS = list("ABCDEFG")
 
