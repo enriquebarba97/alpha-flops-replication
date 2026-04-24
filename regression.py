@@ -103,14 +103,13 @@ def collect():
 # --- Regression ---
 
 def alpha_model(x, beta, gamma, final):
-    """Alpha-FLOPs model for curve fitting.
-
-    Parameters x = (S, K) where S = W * H.
-    Returns predicted avg_time / FLOPs.
-    """
-    S, K = x
+    S, K, F = x 
     Sk = np.log(K) + 1
-    return final * ((Sk + beta * (S - Sk)) / S) ** gamma
+    res = (Sk + beta * (S - Sk)) / S
+    res = np.log(res)
+    res = gamma * res
+    res = final * np.exp(res)
+    return res * F
 
 
 def fit_group(df):
@@ -120,14 +119,14 @@ def fit_group(df):
     """
     S = (df["W"] * df["H"]).values.astype(float)
     K = df["K"].values.astype(float)
-    avg_time = df["avg_time"].values
+    avg_time = df["avg_time"].values * 1e3
     flops = df["FLOPs"].values
-    y = avg_time / flops
+    y = avg_time
 
     params, _ = curve_fit(
-        alpha_model, (S, K), y,
-        p0=[0.01, 0.8, 1e-9],
-        bounds=([0, 0, 0], [1, 1, 1]),
+        alpha_model, (S, K, flops), y,
+        p0=[0.01, 0.8, 0.3],
+        bounds=([0, 0, 0], [2, 2, 2]),
     )
     return params
 
@@ -158,12 +157,22 @@ def fit():
 # --- CLI ---
 
 def main():
+    global GPU_NAME, DATA_DIR, DATA_FILE
+
     parser = argparse.ArgumentParser(description="Alpha-FLOPs regression")
     parser.add_argument(
         "action", choices=["collect", "fit", "run"],
         help="collect: run sweep, fit: fit model, run: both",
     )
+    parser.add_argument(
+        "--gpu-name", type=str, default=GPU_NAME,
+        help=f"GPU name used for data subdirectory (default: {GPU_NAME})",
+    )
     args = parser.parse_args()
+
+    GPU_NAME = args.gpu_name
+    DATA_DIR = os.path.join("data", GPU_NAME)
+    DATA_FILE = os.path.join(DATA_DIR, "regression-data.csv")
 
     if args.action in ("collect", "run"):
         collect()

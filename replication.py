@@ -203,63 +203,10 @@ def plot_experiment_A():
 
 # ===============================================================================
 # Experiment B
-# CxK held constant at {1500, 2100, 3000, 4500}; K varies 1..30; H=W=10.
-# ===============================================================================
-
-def collect_experiment_B() -> pd.DataFrame:
-    _ensure_dirs()
-    rows = []
-    for CxK in [1500, 2100, 3000, 4500]:
-        for K in range(1, 31):
-            C = round(CxK / K)
-            layer = create_conv_layer(C, C, kernel_size=K, padding="same")
-            inp = torch.randn(1, C, 10, 10, device=device)
-            avg, q25, q75 = benchmark(layer, inp)
-            rows.append(dict(CxK=CxK, K=K, Cin=C, Cout=C, H=10, W=10,
-                             avg_time=avg, q25=q25, q75=q75))
-        print(f"  CxK={CxK} done")
-
-    df = pd.DataFrame(rows)
-    df.to_csv(_data_path("B"), index=False)
-    print(f"Saved {_data_path('B')}")
-    return df
-
-
-def plot_experiment_B():
-    df = pd.read_csv(_data_path("B"))
-    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    for idx, cxk in enumerate([1500, 2100, 3000, 4500]):
-        sub = df[df["CxK"] == cxk].sort_values("K")
-        ax.plot(sub["K"], sub["avg_time"] * 1e3, marker="o",
-                label=rf"$C \cdot K={cxk}$", color=colors[idx])
-        alpha_pred = sub.apply(
-            lambda r: alpha_model(
-                r["H"] * r["W"], r["K"],
-                compute_flops(r["W"], r["H"], r["K"], r["Cin"], r["Cout"])),
-            axis=1)
-        ax.plot(sub["K"], alpha_pred, marker="x", ls="--",
-                color=colors[idx])
-
-    ax.set_xlabel("K Size")
-    ax.set_ylabel("Forward Pass Time (milliseconds)")
-    ax.set_title(r"Time for increasing kernels and decreasing channels."
-                 r" $H=W=10$, $C_{in}=C_{out}=C$")
-    ax.grid(True, which="both", ls="--")
-    ax.legend()
-
-    fig.savefig(_figure_path("B"), bbox_inches="tight")
-    plt.close(fig)
-    print(f"Saved {_figure_path('B')}")
-
-
-# ===============================================================================
-# Experiment C
 # C in {50, 70, 100, 150}; K varies 1..30; H = W = round(300/K).
 # ===============================================================================
 
-def collect_experiment_C() -> pd.DataFrame:
+def collect_experiment_B() -> pd.DataFrame:
     _ensure_dirs()
     rows = []
     for C in [50, 70, 100, 150]:
@@ -273,13 +220,13 @@ def collect_experiment_C() -> pd.DataFrame:
         print(f"  C={C} done")
 
     df = pd.DataFrame(rows)
-    df.to_csv(_data_path("C"), index=False)
-    print(f"Saved {_data_path('C')}")
+    df.to_csv(_data_path("B"), index=False)
+    print(f"Saved {_data_path('B')}")
     return df
 
 
-def plot_experiment_C():
-    df = pd.read_csv(_data_path("C"))
+def plot_experiment_B():
+    df = pd.read_csv(_data_path("B"))
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -301,6 +248,59 @@ def plot_experiment_C():
     ax.set_ylabel("Forward Pass Time (milliseconds)")
     ax.set_title(r"Time for increasing kernels and decreasing input size."
                  r" $H=W=300/K$")
+    ax.grid(True, which="both", ls="--")
+    ax.legend()
+
+    fig.savefig(_figure_path("B"), bbox_inches="tight")
+    plt.close(fig)
+    print(f"Saved {_figure_path('B')}")
+
+
+# ===============================================================================
+# Experiment C
+# CxK held constant at {1500, 2100, 3000, 4500}; K varies 1..30; H=W=10.
+# ===============================================================================
+
+def collect_experiment_C() -> pd.DataFrame:
+    _ensure_dirs()
+    rows = []
+    for CxK in [1500, 2100, 3000, 4500]:
+        for K in range(1, 31):
+            C = round(CxK / K)
+            layer = create_conv_layer(C, C, kernel_size=K, padding="same")
+            inp = torch.randn(1, C, 10, 10, device=device)
+            avg, q25, q75 = benchmark(layer, inp)
+            rows.append(dict(CxK=CxK, K=K, Cin=C, Cout=C, H=10, W=10,
+                             avg_time=avg, q25=q25, q75=q75))
+        print(f"  CxK={CxK} done")
+
+    df = pd.DataFrame(rows)
+    df.to_csv(_data_path("C"), index=False)
+    print(f"Saved {_data_path('C')}")
+    return df
+
+
+def plot_experiment_C():
+    df = pd.read_csv(_data_path("C"))
+    colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for idx, cxk in enumerate([1500, 2100, 3000, 4500]):
+        sub = df[df["CxK"] == cxk].sort_values("K")
+        ax.plot(sub["K"], sub["avg_time"] * 1e3, marker="o",
+                label=rf"$C \cdot K={cxk}$", color=colors[idx])
+        alpha_pred = sub.apply(
+            lambda r: alpha_model(
+                r["H"] * r["W"], r["K"],
+                compute_flops(r["W"], r["H"], r["K"], r["Cin"], r["Cout"])),
+            axis=1)
+        ax.plot(sub["K"], alpha_pred, marker="x", ls="--",
+                color=colors[idx])
+
+    ax.set_xlabel("K Size")
+    ax.set_ylabel("Forward Pass Time (milliseconds)")
+    ax.set_title(r"Time for increasing kernels and decreasing channels."
+                 r" $H=W=10$, $C_{in}=C_{out}=C$")
     ax.grid(True, which="both", ls="--")
     ax.legend()
 
@@ -419,7 +419,7 @@ def plot_experiment_E():
     df = pd.read_csv(_data_path("E"))
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     for idx, Cin in enumerate([50, 100, 150]):
         sub = df[df["Cin"] == Cin].sort_values("Cout")
         ax.scatter(sub["Cout"], sub["avg_time"] * 1e3, marker="o",
@@ -502,7 +502,7 @@ def plot_experiment_F():
     df = pd.read_csv(_data_path("F"))
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     for idx, H_val in enumerate([100, 200, 300]):
         sub = df[df["H"] == H_val].sort_values("Cout")
         ax.scatter(sub["Cout"], sub["avg_time"] * 1e3, marker="o",
@@ -585,7 +585,7 @@ def plot_experiment_G():
     df = pd.read_csv(_data_path("G"))
     colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     for idx, K_val in enumerate([1, 3, 5]):
         sub = df[df["K"] == K_val].sort_values("Cin")
         ax.scatter(sub["Cin"], sub["avg_time"] * 1e3, marker="o",
@@ -665,6 +665,8 @@ PLOTTERS = {
 
 
 def main():
+    global GPU_NAME, DATA_DIR, FIGURES_DIR
+
     parser = argparse.ArgumentParser(
         description="Replication package - CNN layer timing experiments")
     parser.add_argument("action", choices=["collect", "plot", "run"],
@@ -673,7 +675,14 @@ def main():
                              "run = collect + plot")
     parser.add_argument("experiment", type=str,
                         help="Experiment ID (A..G) or 'all'")
+    parser.add_argument("--gpu-name", type=str, default=GPU_NAME,
+                        help="GPU name used for data/figure subdirectory "
+                             f"(default: {GPU_NAME})")
     args = parser.parse_args()
+
+    GPU_NAME = args.gpu_name
+    DATA_DIR = os.path.join("data", GPU_NAME)
+    FIGURES_DIR = os.path.join("figures", GPU_NAME)
 
     ids = EXPERIMENTS if args.experiment.lower() == "all" else [args.experiment.upper()]
 
